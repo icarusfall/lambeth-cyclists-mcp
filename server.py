@@ -51,7 +51,11 @@ DATABASES = {
 # Clients
 # ---------------------------------------------------------------------------
 notion = Client(auth=os.environ["NOTION_API_TOKEN"])
-mcp = FastMCP("lambeth-cyclists")
+mcp = FastMCP(
+    "lambeth-cyclists",
+    host="0.0.0.0",
+    port=int(os.environ.get("PORT", 8000)),
+)
 
 # ---------------------------------------------------------------------------
 # Notion helpers
@@ -763,16 +767,12 @@ def list_databases() -> str:
 # Server startup
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
     transport = sys.argv[1] if len(sys.argv) > 1 else "streamable-http"
 
     logger.info(
         "Starting Lambeth Cyclists MCP server — port=%s transport=%s",
-        port,
+        os.environ.get("PORT", 8000),
         transport,
     )
 
-    if transport == "stdio":
-        mcp.run(transport="stdio")
-    else:
-        mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
+    mcp.run(transport=transport)
